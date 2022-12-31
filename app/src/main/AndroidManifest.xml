@@ -2,8 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permisson.USE_EXACT_ALARM"/>
-    <uses-permission android:name="android.permisson.SCHEDULE_EXACT_ALARM"/>
+
 
     <application
         android:allowBackup="true"
@@ -14,7 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Alarms"
-        tools:targetApi="26">
+        tools:targetApi="29">
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -28,9 +27,7 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
-        <activity android:name="com.example.alarms.AlarmActivity" />
-
-        <receiver android:name=".AlarmService"/>
+        <activity android:name=".AlarmActivity"/>
     </application>
 
 </manifest>
