@@ -123,6 +123,20 @@ public class MainActivity extends AppCompatActivity {
 
     private void makeTimer(long timeInMillis)
     {
+        if(timeInMillis != 0) {
+            setTimer(timeInMillis);
+            Intent waitActivity = new Intent(this, TimerWaitActivity.class);
+            waitActivity.putExtra(AlarmReceiver.TOTAL_TIME, timeInMillis);
+            startActivity(waitActivity);
+        }
+        else
+        {
+            Toast.makeText(getApplicationContext(), "Таймер на 0 секунд?", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setTimer(long timeInMillis)
+    {
         AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
         long curTime = System.currentTimeMillis();
         //checkPermission();
@@ -133,7 +147,9 @@ public class MainActivity extends AppCompatActivity {
                 alarmIntent.putExtra(AlarmReceiver.TOTAL_TIME, timeInMillis);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, alarmIntent, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, curTime + timeInMillis, pendingIntent);
-                Toast.makeText(getApplicationContext(), "Таймер поставлен", Toast.LENGTH_SHORT).show();
+
+
+                //Toast.makeText(getApplicationContext(), "Таймер поставлен", Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
                 Toast.makeText(getApplicationContext(), "Ошибка постановка таймера: " + e.toString(), Toast.LENGTH_LONG).show();
             }

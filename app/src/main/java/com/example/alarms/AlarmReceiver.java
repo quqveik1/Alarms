@@ -32,7 +32,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             }
             if (type.compareTo(OK_INTENT) == 0)
             {
-                okReceive(context, intent);
+                okReceive(context);
             }
         }
         catch (Exception e)
@@ -42,7 +42,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     }
 
-    private void okReceive(Context context, Intent intent)
+    public static void cancelAlarmNotification(Context context)
     {
         try
         {
@@ -56,17 +56,19 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     }
 
+    private void okReceive(Context context)
+    {
+        cancelAlarmNotification(context);
+    }
+
     private void timerReceive(Context context, Intent intent)
     {
         try
         {
             long time = intent.getLongExtra(TOTAL_TIME, 0);
 
-            if (AppStatus.getStatus() == 0) {
-                makeNotification(time, context);
-            } else {
-                context.startActivity(createAlarmIntent(context, time));
-            }
+            makeNotification(time, context);
+
         }
         catch (Exception e)
         {
@@ -78,12 +80,12 @@ public class AlarmReceiver extends BroadcastReceiver {
     public static Intent createAlarmIntent (Context context, long time)
     {
         Intent alarmActivityIntent = new Intent(context, AlarmActivity.class);
-        alarmActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        alarmActivityIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NO_HISTORY);
         alarmActivityIntent.putExtra("Total time", time);
         return  alarmActivityIntent;
     }
 
-    public final int timerNotificationId = 1;
+    public static final int timerNotificationId = 1;
 
     private void makeNotification(long totalTime, Context context)
     {

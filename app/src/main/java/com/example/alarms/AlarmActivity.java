@@ -25,7 +25,8 @@ public class AlarmActivity extends AppCompatActivity {
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                finish();
+                AlarmReceiver.cancelAlarmNotification(getApplicationContext());
+                returnToMainActivity();
             }
         });
         Intent previousIntent = getIntent();
@@ -50,6 +51,19 @@ public class AlarmActivity extends AppCompatActivity {
         String outputStr = AlarmReceiver.stringTime(totalTime);
 
         timeView.setText(outputStr);
+
+    }
+
+    private void returnToMainActivity()
+    {
+        Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
+        mainActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(mainActivity);
+    }
+
+    @Override
+    public void onBackPressed() {
+        returnToMainActivity();
 
     }
 
