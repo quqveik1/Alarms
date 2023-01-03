@@ -3,10 +3,14 @@ package com.example.alarms;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     //private static final int SCHEDULE_EXACT_ALARM = 57;
     private static boolean canUSE_EXACT_ALARM = true;
     //private static final int USE_EXACT_ALARM = 1329;
+
+    public static final String MainNotificationChannel = "MainNotificationChannel";
 
 
     @Override
@@ -80,91 +86,38 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        //makeTimer(1000);
 
-    }
-    /*
+        createMainNotificationChannel();
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults)
-    {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == SCHEDULE_EXACT_ALARM)
-        {
-            if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED))
-            {
-                Toast.makeText(getApplicationContext(), "Программа работать не будет", Toast.LENGTH_LONG).show();
-            }
-            else
-            {
-                canSCHEDULE_EXACT_ALARM = true;
-            }
-        }
 
-        if (requestCode == USE_EXACT_ALARM)
-        {
-
-            if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                Toast.makeText(getApplicationContext(), "Программа работать не будет", Toast.LENGTH_LONG).show();
-            } else {
-                canUSE_EXACT_ALARM = true;
-            }
-
-        }
-    }
-    */
-    /*
-    private static final int WRITE_STORAGE = 57;
-    private static final int READ_STORAGE = 1329;
-
-    private void checkPermission()
-    {
-        boolean write =
-                ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) == PackageManager.PERMISSION_GRANTED;
-        boolean read =
-                ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.READ_EXTERNAL_STORAGE
-                ) == PackageManager.PERMISSION_GRANTED;
-
-        if (write == false)
-        {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, WRITE_STORAGE);
-        }
-
-        if (read == false)
-        {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[] { Manifest.permission.READ_EXTERNAL_STORAGE }, READ_STORAGE);
-        }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults)
-    {
-        super.onRequestPermissionsResult(requestCode,
-                permissions,
-                grantResults);
+    protected void onResume() {
+        super.onResume();
+        AppStatus.setActive();
+    }
 
-        if (requestCode == WRITE_STORAGE)
+    @Override
+    protected void onPause() {
+        super.onPause();
+        AppStatus.setInActive();
+    }
+
+    private void createMainNotificationChannel()
+    {
+        try {
+            NotificationChannel notificationChannel = new NotificationChannel(MainNotificationChannel, "Таймер", NotificationManager.IMPORTANCE_HIGH);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+        catch (Exception e)
         {
-            if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED))
-            {
-                Toast toast = Toast.makeText(this, "ДЛЯ РАБОТЫ НЕОБХОДИМ ДОСТУП К ПАМЯТИ!!!", Toast.LENGTH_SHORT);
-                toast.show();
-            }
+            Toast.makeText(getApplicationContext(), "Ошибка создания канала уведомлений: " + e.toString(), Toast.LENGTH_LONG).show();
         }
 
-
-    };
-     */
+    }
 
 
 
@@ -175,11 +128,12 @@ public class MainActivity extends AppCompatActivity {
         //checkPermission();
         if (canSCHEDULE_EXACT_ALARM) {
             try {
-                Intent alarmIntent = new Intent(this, AlarmActivity.class);
-                alarmIntent.putExtra("Total time", timeInMillis);
-                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT  |  PendingIntent.FLAG_MUTABLE);
+                Intent alarmIntent = new Intent(this, AlarmReceiver.class);
+                alarmIntent.putExtra(AlarmReceiver.MESSAGE_TYPE, AlarmReceiver.TIMER_INTENT);
+                alarmIntent.putExtra(AlarmReceiver.TOTAL_TIME, timeInMillis);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, alarmIntent, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, curTime + timeInMillis, pendingIntent);
-                Toast.makeText(getApplicationContext(), "Таймер поставлен", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Таймер поставлен", Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
                 Toast.makeText(getApplicationContext(), "Ошибка постановка таймера: " + e.toString(), Toast.LENGTH_LONG).show();
             }
@@ -283,3 +237,86 @@ public class MainActivity extends AppCompatActivity {
          */
     }
 }
+
+    /*
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == SCHEDULE_EXACT_ALARM)
+        {
+            if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED))
+            {
+                Toast.makeText(getApplicationContext(), "Программа работать не будет", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                canSCHEDULE_EXACT_ALARM = true;
+            }
+        }
+
+        if (requestCode == USE_EXACT_ALARM)
+        {
+
+            if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                Toast.makeText(getApplicationContext(), "Программа работать не будет", Toast.LENGTH_LONG).show();
+            } else {
+                canUSE_EXACT_ALARM = true;
+            }
+
+        }
+    }
+    */
+    /*
+    private static final int WRITE_STORAGE = 57;
+    private static final int READ_STORAGE = 1329;
+
+    private void checkPermission()
+    {
+        boolean write =
+                ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_GRANTED;
+        boolean read =
+                ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_GRANTED;
+
+        if (write == false)
+        {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, WRITE_STORAGE);
+        }
+
+        if (read == false)
+        {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[] { Manifest.permission.READ_EXTERNAL_STORAGE }, READ_STORAGE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode,
+                permissions,
+                grantResults);
+
+        if (requestCode == WRITE_STORAGE)
+        {
+            if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED))
+            {
+                Toast toast = Toast.makeText(this, "ДЛЯ РАБОТЫ НЕОБХОДИМ ДОСТУП К ПАМЯТИ!!!", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        }
+
+
+    };
+     */

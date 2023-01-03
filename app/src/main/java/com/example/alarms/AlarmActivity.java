@@ -39,24 +39,29 @@ public class AlarmActivity extends AppCompatActivity {
         {
             Toast.makeText(getApplicationContext(), "Проблема с получением времени таймера:  " + e.toString(), Toast.LENGTH_LONG).show();    
         }
+
+        /*
         long hours = totalTime / (3600 * 1000);
         long minutes = (totalTime -(hours * 3600 * 1000)) / (60 * 1000);
         long seconds = (totalTime - (hours * 3600 * 1000) - (minutes * 60 * 1000)) / 1000;
 
-        String outputStr = "";
-        if (hours != 0)
-        {
-            outputStr += hours + " часов ";
-        }
-        if (minutes != 0)
-        {
-            outputStr += minutes + " минут ";
-        }
-        if (seconds != 0)
-        {
-            outputStr += seconds + " cекунд ";
-        }
+         */
+
+        String outputStr = AlarmReceiver.stringTime(totalTime);
+
         timeView.setText(outputStr);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AppStatus.setActive();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        AppStatus.setInActive();
     }
 }
